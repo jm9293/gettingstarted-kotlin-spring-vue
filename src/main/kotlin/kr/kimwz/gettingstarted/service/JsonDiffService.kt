@@ -2,27 +2,50 @@ package kr.kimwz.gettingstarted.service
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import kr.kimwz.gettingstarted.entity.JsonDiff
+import kr.kimwz.gettingstarted.repository.JsonDiffRepository
+import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.stereotype.Service
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 @Service
-class JsonDiffService {
+class JsonDiffService (val jsonDiffRepository : JsonDiffRepository){
 
-    fun compareJson(Json1 : String , Json2 : String, param : String) : String{
-        return compare(Json1 ,Json2)
+    fun compareJson(Json1 : String , Json2 : String, param : String) : DiffJsonResult{
+
+        val res : JsonDiff? = try {
+            jsonDiffRepository.findByParam(param)
+        }catch (e : EmptyResultDataAccessException){ // 정보가 아예 없다면
+            null
+        }
+
+
+        return if(res != null){ // 이미 비교가 끝나서 db에 있는거라면
+            DiffJsonResult(res.bool.toString(), res.result.toString())
+        } else{ // diff 값저장
+            val jsonDiff = JsonDiff()
+            val compareResult = compare(Json1 ,Json2);
+            jsonDiff.bool = compareResult.bool
+            jsonDiff.result = compareResult.result
+            jsonDiff.param = param
+            jsonDiffRepository.save(jsonDiff)
+            compareResult;
+        }
+
+
     }
 
 
-    private fun compare(Json1 : String , Json2 : String): String {
+    private fun compare(Json1 : String , Json2 : String): DiffJsonResult {
 
         val mapper = jacksonObjectMapper()
         val json1 = mapper.readValue<MutableMap<String, Any>>(Json1)
         val json2 = mapper.readValue<MutableMap<String, Any>>(Json2)
 
-        val result = isMap(json1, json2, json1)
+        val result = mapper.writeValueAsString(isMap(json1, json2, json1));
 
-        val resultStr = mapper.writeValueAsString(result);
-
-        return resultStr;
+        return DiffJsonResult((json1==json2).toString() , result);
     }
 
 
@@ -53,14 +76,14 @@ class JsonDiffService {
                     result[key] = isString(com1[key] as String, com2[key] as String, origin[key] as String)
 
                 } else { // 프로퍼티는 같지만 타입 불일치
-                    result[key] = origin[key].toString() + " # 다른타입"
+                    result[key] = origin[key].toString() + "#다른타입"
                 }
 
             } else { // com2에만 있는 프로퍼티
                 if (origin.containsKey(key))
-                    result[key] = "#json1에만 프로퍼티";
+                    result[key] = "#json1에만 있는 프로퍼티";
                 else
-                    result[key] = "#json2에만 프로퍼티";
+                    result[key] = "#json2에만 있는 프로퍼티";
             }
 
 
@@ -131,3 +154,5 @@ class JsonDiffService {
 
 
 }
+
+data class DiffJsonResult(val bool : String, val result : String)

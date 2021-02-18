@@ -41,8 +41,9 @@
           <v-textarea
               filled
               name="result"
-              label="비교결과"
+              label="Json1과 비교결과"
               v-model="result"
+              v-bind:rows="rows"
               readonly
           ></v-textarea>
         </v-col>
@@ -62,7 +63,8 @@ export default {
     return {
       json1 : "{}",
       json2 : "{}",
-      result : ""
+      result : "",
+      rows : 3
     }
   },
 
@@ -92,8 +94,13 @@ export default {
         "json2" : JSON.stringify(json2)
       }
 
-      axios.post("http://localhost:8765/jsondiff?key=" + param, data).then((res)=>
-          this.result = JSON.stringify(res["data"],null,2)
+      axios.post("http://localhost:8765/jsondiff?key=" + param, data).then((res)=>{
+            let json = JSON.parse(res["data"]["result"])
+            this.result = res["data"]["bool"] == "true" ? '일치\n' : '불일치\n'
+            this.result += JSON.stringify(json,null,2);
+            this.rows = this.result.match(/\n/g).length+3;
+      }
+
       );
 
     },
