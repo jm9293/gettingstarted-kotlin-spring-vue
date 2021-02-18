@@ -1,6 +1,8 @@
 <template>
-  <v-card>
-    <v-card-title>접속 로그</v-card-title>
+  <div>
+  <v-btn v-on:click="toggle=!toggle">로그 {{toggle ? "접기" : "펴기"}}</v-btn>
+  <v-card v-if="toggle">
+    <v-card-title>접속 기록</v-card-title>
     <v-card-text>
       <v-row v-for="log in logs" :key="log.id">
         <v-col>{{log.id}}</v-col>
@@ -9,6 +11,7 @@
       </v-row>
     </v-card-text>
   </v-card>
+  </div>
 </template>
 
 <script>
@@ -18,7 +21,8 @@ export default {
     name: 'LogsView',
     data() {
         return {
-            logs: []
+            logs: [],
+            toggle: false
         }
     },
     async created() {
