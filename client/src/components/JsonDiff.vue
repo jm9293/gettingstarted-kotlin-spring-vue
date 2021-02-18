@@ -53,6 +53,8 @@
 </template>
 
 <script>
+import axios from "axios"
+
 export default {
   name : "jsonDiff",
 
@@ -66,10 +68,54 @@ export default {
 
   methods: {
     diff() {
-      alert("비교가즈아")
-      this.result = this.json1
+      let json1 , json2;
+      try {
+        json1 = JSON.parse(this.json1);
+        console.log(json1)
+        json2 = JSON.parse(this.json2);
+        console.log(json2)
+      } catch (error){
+        if(error instanceof SyntaxError){
+          alert("json 형식이 올바르지 않습니다.")
+        }else{
+          alert("기타에러")
+        }
+        this.clear();
+        return;
+      }
+
+      let param = this.hashAndString(this.json1) + this.hashAndString(this.json2)
+
+
+      let data = {
+        "json1" : JSON.stringify(json1),
+        "json2" : JSON.stringify(json2)
+      }
+
+      axios.post("http://localhost:8765/jsondiff?key=" + param, data).then((res)=>
+          this.result = JSON.stringify(res["data"],null,2)
+      );
+
+    },
+
+    clear(){
+      this.json1 = "{}"
+      this.json2 = "{}"
+      this.result = ""
+    },
+
+    hashAndString(input){ // 해시 코드 생성 16진수로 변환
+      let hash = 0, len = input.length;
+      for (let i = 0; i < len; i++) {
+        hash  = ((hash << 5) - hash) + input.charCodeAt(i)
+        hash |= 0;
+      }
+      return hash.toString(16)
     }
+
   }
+
+
 
 }
 </script>

@@ -24,6 +24,7 @@ dependencies {
 	implementation("com.h2database:h2")
 	implementation("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin") // test jackson 사용용
 }
 
 tasks.withType<KotlinCompile> {
