@@ -11,7 +11,7 @@ const routes = [
     {
         path: "/",
         name: "Home",
-        redirect : "/log"
+        redirect : "/jsonDiff"
     },
     {
         path: "/log",

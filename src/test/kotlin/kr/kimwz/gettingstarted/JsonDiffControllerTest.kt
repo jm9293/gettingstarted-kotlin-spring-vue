@@ -4,7 +4,6 @@ package kr.kimwz.gettingstarted
 import kr.kimwz.gettingstarted.repository.JsonDiffRepository
 import kr.kimwz.gettingstarted.service.JsonDiffService
 import org.junit.jupiter.api.*
-import org.junit.jupiter.api.AfterAll
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 

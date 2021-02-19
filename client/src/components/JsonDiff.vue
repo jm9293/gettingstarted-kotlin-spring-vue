@@ -18,6 +18,7 @@
               name="json1"
               label="JSON-1"
               v-model="json1"
+              rows="20"
           ></v-textarea>
         </v-col>
         <v-col
@@ -29,6 +30,7 @@
               name="json2"
               label="JSON-2"
               v-model="json2"
+              rows="20"
           ></v-textarea>
         </v-col>
       </v-row>
