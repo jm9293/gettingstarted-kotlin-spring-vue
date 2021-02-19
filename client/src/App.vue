@@ -1,19 +1,17 @@
 <template>
   <div id="app">
-    <LogsView></LogsView>
-    <JsonDiff></JsonDiff>
+    <v-btn to="log">로그보기</v-btn>
+    <v-btn to="jsonDiff">json 비교하기</v-btn>
+    <hr>
+    <router-view />
   </div>
 </template>
 
 <script>
-import LogsView from "@/components/LogsView"
-import JsonDiff from "@/components/JsonDiff"
+
 export default {
   name: 'App',
-  components: {
-      LogsView,
-      JsonDiff
-  },
+
   created() {
   },
   methods: {

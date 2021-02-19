@@ -12,29 +12,48 @@ import kotlin.collections.HashMap
 @Service
 class JsonDiffService (val jsonDiffRepository : JsonDiffRepository){
 
-    fun compareJson(Json1 : String , Json2 : String, param : String) : DiffJsonResult{
+    fun compareJson(Json1 : String , Json2 : String, param : String) : String{
+        try {
 
+            val res : JsonDiff? = try {
+                jsonDiffRepository.findByParam(param)
+            }catch (e : EmptyResultDataAccessException){ // 정보가 아예 없다면
+                null
+            }
+
+
+            if(res == null){ // DB에 없는거라면 diff 값저장
+
+                val jsonDiff = JsonDiff()
+                val compareResult = compare(Json1 ,Json2);
+                jsonDiff.bool = compareResult.bool
+                jsonDiff.result = compareResult.result
+                jsonDiff.param = param
+                println()
+                jsonDiffRepository.save(jsonDiff)
+            }
+            return "OK"
+
+        }catch (e : Exception){ // 변화과 비교 과정에서 오류가 있다면
+            return "NO"
+        }
+
+    }
+
+    fun findDiffJson(key : String) : DiffJsonResult? {
         val res : JsonDiff? = try {
-            jsonDiffRepository.findByParam(param)
+            jsonDiffRepository.findByParam(key)
         }catch (e : EmptyResultDataAccessException){ // 정보가 아예 없다면
             null
         }
 
-
-        return if(res != null){ // 이미 비교가 끝나서 db에 있는거라면
+        return if(res != null){
             DiffJsonResult(res.bool.toString(), res.result.toString())
-        } else{ // diff 값저장
-            val jsonDiff = JsonDiff()
-            val compareResult = compare(Json1 ,Json2);
-            jsonDiff.bool = compareResult.bool
-            jsonDiff.result = compareResult.result
-            jsonDiff.param = param
-            jsonDiffRepository.save(jsonDiff)
-            compareResult;
+        }else{
+            null
         }
-
-
     }
+
 
 
     private fun compare(Json1 : String , Json2 : String): DiffJsonResult {

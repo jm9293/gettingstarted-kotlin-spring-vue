@@ -1,16 +1,19 @@
 <template>
   <div>
-  <v-btn v-on:click="toggle=!toggle">로그 {{toggle ? "접기" : "펴기"}}</v-btn>
-  <v-card v-if="toggle">
-    <v-card-title>접속 기록</v-card-title>
-    <v-card-text>
-      <v-row v-for="log in logs" :key="log.id">
-        <v-col>{{log.id}}</v-col>
-        <v-col>{{log.payload}}</v-col>
-        <v-col>{{moment(log.createTime).fromNow()}}</v-col>
-      </v-row>
-    </v-card-text>
-  </v-card>
+    <v-container fluid>
+      <v-banner elevation="1" single-line>접속기록보기</v-banner>
+      <v-btn v-on:click="toggle=!toggle">로그 {{toggle ? "접기" : "펴기"}}</v-btn>
+      <v-card v-if="toggle">
+        <v-card-title>접속 기록</v-card-title>
+        <v-card-text>
+          <v-row v-for="log in logs" :key="log.id">
+            <v-col>{{log.id}}</v-col>
+            <v-col>{{log.payload}}</v-col>
+            <v-col>{{moment(log.createTime).fromNow()}}</v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
+      </v-container>
   </div>
 </template>
 

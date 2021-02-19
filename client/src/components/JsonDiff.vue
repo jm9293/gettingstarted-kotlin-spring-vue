@@ -36,17 +36,6 @@
         <v-col cols="10" id="diffBtn">
           <v-btn block @click="diff">비교하기</v-btn>
         </v-col>
-
-        <v-col cols="12" v-if="result!==''">
-          <v-textarea
-              filled
-              name="result"
-              label="Json1과 비교결과"
-              v-model="result"
-              v-bind:rows="rows"
-              readonly
-          ></v-textarea>
-        </v-col>
       </v-row>
     </v-container>
 
@@ -63,19 +52,15 @@ export default {
     return {
       json1 : "{}",
       json2 : "{}",
-      result : "",
-      rows : 3
     }
   },
 
   methods: {
     diff() {
       let json1 , json2;
-      try {
+      try { // JSON으로 변환해서 문법검사 및 변환
         json1 = JSON.parse(this.json1);
-        console.log(json1)
         json2 = JSON.parse(this.json2);
-        console.log(json2)
       } catch (error){
         if(error instanceof SyntaxError){
           alert("json 형식이 올바르지 않습니다.")
@@ -94,24 +79,24 @@ export default {
         "json2" : JSON.stringify(json2)
       }
 
-      axios.post("http://localhost:8765/jsondiff?key=" + param, data).then((res)=>{
-            let json = JSON.parse(res["data"]["result"])
-            this.result = res["data"]["bool"] == "true" ? '일치\n' : '불일치\n'
-            this.result += JSON.stringify(json,null,2);
-            this.rows = this.result.match(/\n/g).length+3;
-      }
-
-      );
+      axios.post("http://localhost:8765/jsondiff?key=" + param , data).then((res)=>{ // 서버에 보낸후 결과 값을 보기위해 push
+            if(res["data"]=="OK"){
+              this.$router.push("/jsonDiffRes?key=" + param)
+            }else {
+              alert("입력값이 잘못되었거나 서버 오류")
+            }
+      }).catch(()=>{
+        alert("서버와 통신이 안되거나 서버내부오류입니다.")
+      })
 
     },
 
-    clear(){
+    clear(){ // 비우기
       this.json1 = "{}"
       this.json2 = "{}"
-      this.result = ""
     },
 
-    hashAndString(input){ // 해시 코드 생성 16진수로 변환
+    hashAndString(input){ // 해시 코드 생성 후 16진수로 변환하여 좀 더짧게
       let hash = 0, len = input.length;
       for (let i = 0; i < len; i++) {
         hash  = ((hash << 5) - hash) + input.charCodeAt(i)
