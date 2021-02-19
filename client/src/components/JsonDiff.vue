@@ -46,7 +46,7 @@
 
 <script>
 import axios from "axios"
-
+import sha256 from 'crypto-js/sha256';
 export default {
   name : "jsonDiff",
 
@@ -73,7 +73,8 @@ export default {
         return;
       }
 
-      let param = this.hashAndString(this.json1) + this.hashAndString(this.json2)
+
+      let param = sha256(this.json1).toString() + sha256(this.json2).toString()
 
 
       let data = {
@@ -98,14 +99,6 @@ export default {
       this.json2 = "{}"
     },
 
-    hashAndString(input){ // 해시 코드 생성 후 16진수로 변환하여 좀 더짧게
-      let hash = 0, len = input.length;
-      for (let i = 0; i < len; i++) {
-        hash  = ((hash << 5) - hash) + input.charCodeAt(i)
-        hash |= 0;
-      }
-      return hash.toString(16)
-    }
 
   }
 
