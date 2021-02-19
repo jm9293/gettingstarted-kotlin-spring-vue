@@ -35,6 +35,7 @@ class JsonDiffService (val jsonDiffRepository : JsonDiffRepository){
             return "OK"
 
         }catch (e : Exception){ // 변화와 비교 과정에서 오류가 있다면
+            e.printStackTrace()
             return "NO"
         }
 
@@ -59,10 +60,23 @@ class JsonDiffService (val jsonDiffRepository : JsonDiffRepository){
     private fun compare(Json1 : String , Json2 : String): DiffJsonResult {
 
         val mapper = jacksonObjectMapper()
-        val json1 = mapper.readValue<MutableMap<String, Any>>(Json1)
-        val json2 = mapper.readValue<MutableMap<String, Any>>(Json2)
+        var json1 : Any? = null
+        var json2 : Any? = null
+        var result : String? = null
+        if(Json1[0] == '{' && Json1[Json1.length-1] =='}' && Json2[0] == '{' && Json2[Json2.length-1] =='}'){ // 비교대상이 맵일때
+            json1 = mapper.readValue<MutableMap<String, Any>>(Json1)
+            json2 = mapper.readValue<MutableMap<String, Any>>(Json2)
+            result = mapper.writeValueAsString(isMap(json1, json2, json1));
+        }else if(Json1[0] == '[' && Json1[Json1.length-1] ==']' && Json2[0] == '[' && Json2[Json2.length-1] ==']'){ // 비교대상이 어레이일때
+            json1 = mapper.readValue<List<Any>>(Json1)
+            json2 = mapper.readValue<List<Any>>(Json2)
+            result = mapper.writeValueAsString(isList(json1, json2, json1));
+        }else{ // body 타입 미스매치
+            return DiffJsonResult("false" , "bodyTypeMissMatch");
+        }
 
-        val result = mapper.writeValueAsString(isMap(json1, json2, json1));
+
+
 
         return DiffJsonResult((json1==json2).toString() , result);
     }
@@ -126,17 +140,34 @@ class JsonDiffService (val jsonDiffRepository : JsonDiffRepository){
     private fun isList(json1: List<*>, json2: List<*>, origin: List<*>): List<*> {
 
         val result = ArrayList<Any>() // 배열의 순서를 지키기위해 origin을 복사
-        result.addAll(origin as Collection<Any>)
+
+        //result.addAll(origin as Collection<Any>)
 
         val com1 : ArrayList<Any> = if (json1.size >= json2.size) json1 as ArrayList<Any> else json2 as ArrayList<Any>;
         val com2 : ArrayList<Any> = if (json1.size >= json2.size) json2 as ArrayList<Any> else json1 as ArrayList<Any>;
-        val comSet : HashSet<Any> = HashSet()
-        comSet.addAll(com1)
-        comSet.addAll(com2) //Set에 넣으므로 중복 index 제거
 
-        for (index in comSet){
+        val com2Buf : ArrayList<Any> = ArrayList()
+        val originBuf : ArrayList<Any> = ArrayList()
+        val originRemove : ArrayList<Any> = ArrayList()
+        originBuf.addAll(origin as Collection<Any>)
+        com2Buf.addAll(com2) //com2 복제
+
+        val comAll : ArrayList<Any> = ArrayList()
+
+        for (index in com1){ // 중복인값 쌍당 1개씩만 com2buf에서 날리기
+            if(com2.indexOf(index) != -1){
+                com2Buf.remove(index)
+            }
+        }
+
+        println(com1)
+        println(com2Buf)
+        comAll.addAll(com1)
+        comAll.addAll(com2Buf)
+
+        for (index in comAll){
             if (index is Map<*, *>) { // 맵이라면
-                for (index2 in comSet){
+                for (index2 in comAll){
                     if (index != index2 &&
                         index2 is Map<*, *> &&
                         if(index.keys.size > index2.keys.size)index.keys.containsAll(index2.keys)else index2.keys.containsAll(index.keys)) { // key 값이 많은 기준으로 부분집합인지 확인한다.
@@ -144,27 +175,44 @@ class JsonDiffService (val jsonDiffRepository : JsonDiffRepository){
                             index as Map<String, *> , index2 as Map<String, *> ,
                             origin[if (origin.indexOf(index) != -1) origin.indexOf(index) else origin.indexOf(index2)] as Map<String, *>
                         )
+                        comAll.remove(index) // 값을 지운다
+                        comAll.remove(index2) // 값을 지운다
                     }
+
                 }
 
 
             }else if(index is List<*>){ // 리스트라면
 
-                for (index2 in comSet){
+                for (index2 in comAll){
                     if (index != index2 && index2 is List<*> &&
                         if(index.size > index2.size)index.containsAll(index2) else index2.containsAll(index)){ // 인덱스 값이 많은 기준으로 부분집합인지 확인한다.
                         isList(index , index2 ,  origin[if (origin.indexOf(index) != -1) origin.indexOf(index) else origin.indexOf(index2)] as List<*>)
+                        comAll.remove(index) // 값을 지운다
+                        comAll.remove(index2)
                     }
                 }
 
             }else { // 맵도아니고 리스트도 아니기때문에 공통값이거나 다른값이다.
-                if (!(result.contains(index) && com1.contains(index) && com2.contains(index))){ // 중복이아니라면
-                    if(result.contains(index)){ // result가 오리진을 기준으로 만들었으므로
-                        result[result.indexOf(index)] = ("$index #json1에만 있는 인덱스");
+                println(index)
+                println(originBuf)
+                println(com2Buf)
+                println(result)
+                println()
+                if (!(origin.contains(index) && com1.contains(index) && com2.contains(index) && !originRemove.contains(index))){ // 중복이아니거나 한번 중복이 존재하는 숫자라면
+                    if(originBuf.contains(index) && !com2Buf.contains(index)){ // result가 오리진을 기준으로 만들었으므로
+                        result.add("$index #json1에만 있는 인덱스");
+                    }else if(originBuf.contains(index) && com2Buf.contains(index)){
+                        result.add("$index #json1에만 있는 인덱스");
                     }else{
                         result.add("$index #json2에만 있는 인덱스");
                     }
+                }else{
+                    result.add(index)
                 }
+                originRemove.add(index)
+                originBuf.remove(index)
+
             }
 
 

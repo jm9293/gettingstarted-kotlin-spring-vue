@@ -28,7 +28,7 @@ class JsonDiffControllerTest() {
         //test 1 같은것
         jsonDiffService?.compareJson(json1str,json1str,"test1")
         val res = jsonDiffService?.findDiffJson("test1")
-        
+
         assert(res?.bool == "true");
 
         //test 2 다른것
