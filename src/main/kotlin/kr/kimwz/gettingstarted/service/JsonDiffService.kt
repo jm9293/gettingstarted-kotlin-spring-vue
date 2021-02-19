@@ -92,10 +92,22 @@ class JsonDiffService (val jsonDiffRepository : JsonDiffRepository){
 
                 } else if (com1[key] is String && com2[key] is String) {
 
-                    result[key] = isString(com1[key] as String, com2[key] as String, origin[key] as String)
+                    result[key] = isType(com1[key] as String, com2[key] as String, origin[key] as String)
 
-                } else { // 프로퍼티는 같지만 타입 불일치
-                    result[key] = origin[key].toString() + "#다른타입"
+                } else if (com1[key] is Boolean && com2[key] is Boolean) {
+
+                    result[key] = isType(com1[key] as Boolean, com2[key] as Boolean, origin[key] as Boolean)
+
+                } else if (com1[key] is Int && com2[key] is Int) {
+
+                    result[key] = isType(com1[key] as Int, com2[key] as Int, origin[key] as Int)
+
+                } else if (com1[key] is Double && com2[key] is Double) {
+
+                    result[key] = isType(com1[key] as Double, com2[key] as Double, origin[key] as Double)
+
+                }  else { // 프로퍼티는 같지만 타입 불일치
+                    result[key] = origin[key].toString() + " #다른타입"
                 }
 
             } else { // com2에만 있는 프로퍼티
@@ -126,7 +138,7 @@ class JsonDiffService (val jsonDiffRepository : JsonDiffRepository){
             if (!com2.contains(index)) {
 
                 if (index is Map<*, *>) {
-                    for (index2 in com2) {
+                    com2@ for (index2 in com2){
                         if (index2 is Map<*, *>) {
                             if (index.keys.containsAll(index2.keys)) {
                                 result[if (result.indexOf(index) != -1) result.indexOf(index) else result.indexOf(index2)] =
@@ -137,6 +149,7 @@ class JsonDiffService (val jsonDiffRepository : JsonDiffRepository){
                                             index2
                                         )] as Map<String, *>
                                     )
+                                break@com2 // 한번 비교가 끝난 맵은 비교하지 않는다.
                             } else {
                                 if (result.contains(index)) {
                                     result[result.indexOf(index)] = ("$index #json1에만 있는 인덱스");
@@ -163,13 +176,15 @@ class JsonDiffService (val jsonDiffRepository : JsonDiffRepository){
     }
 
 
-    private fun isString(json1: String, json2: String, origin: String): String {
+    private fun  isType(json1: Any, json2: Any, origin: Any): String {
         return if (json1 == json2) {
-            json1;
+            json1.toString();
         } else {
             "$origin #다른값 (" + (if (json1 == origin) json2 else json1) + ")";
         }
     }
+
+
 
 
 }
