@@ -18,6 +18,7 @@
               name="json1"
               label="JSON-1"
               v-model="json1"
+              @focusout="inputOfJSON(1)"
               rows="20"
           ></v-textarea>
         </v-col>
@@ -30,6 +31,7 @@
               name="json2"
               label="JSON-2"
               v-model="json2"
+              @focusout="inputOfJSON(2)"
               rows="20"
           ></v-textarea>
         </v-col>
@@ -52,8 +54,8 @@ export default {
 
   data() {
     return {
-      json1 : "{}",
-      json2 : "{}",
+      json1 : "",
+      json2 : "",
     }
   },
 
@@ -95,8 +97,23 @@ export default {
     },
 
     clear(){ // 비우기
-      this.json1 = "{}"
-      this.json2 = "{}"
+      this.json1 = ""
+      this.json2 = ""
+    },
+
+    inputOfJSON(num){ // 복붙했을때 json 형식이 맞으면 변환
+      try {
+        if(num===1){
+          console.log("s")
+          let json = JSON.parse(this.json1);
+          this.json1 = JSON.stringify(json,null,2)
+        }else{
+          let json = JSON.parse(this.json2);
+          this.json2 = JSON.stringify(json,null,2)
+        }
+
+      } catch (error){}
+
     },
 
 

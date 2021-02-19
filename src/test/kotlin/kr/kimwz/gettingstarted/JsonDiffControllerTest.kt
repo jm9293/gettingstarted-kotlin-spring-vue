@@ -22,12 +22,8 @@ class JsonDiffControllerTest() {
     @Test
     fun test() {
 
-        val json1str = "{\n" +
-                "   \"users\": [{\"skills\": [{\"skillname\":\"JAVA\", \"level\":\"row\"}]}]\n" +
-                "}" // 다른값일시 기준으로 result에 입력되는 json
-        val json2str = "{\n" +
-                "   \"users\": [{\"skills\": [{\"skillname\":\"JAVA\", \"level\":\"row\"},\"2\"]}]\n" +
-                "}"
+        val json1str = "{\"Aidan Gillen\": {\"array\": [\"Game of Thron\\\"es\",\"The Wire\"],\"string\": \"some string\",\"int\": 2,\"aboolean\": true, \"boolean\": true,\"object\": {\"foo\": \"bar\",\"object1\": {\"new prop1\": \"new prop value\"},\"object2\": {\"new prop1\": \"new prop value\"},\"object3\": {\"new prop1\": \"new prop value\"},\"object4\": {\"new prop1\": \"new prop value\"}}},\"Amy Ryan\": {\"one\": \"In Treatment\",\"two\": \"The Wire\"},\"Annie Fitzgerald\": [\"Big Love\",\"True Blood\"],\"Anwan Glover\": [\"Treme\",\"The Wire\"],\"Alexander Skarsgard\": [\"Generation Kill\",\"True Blood\"], \"Clarke Peters\": null}" // 다른값일시 기준으로 result에 입력되는 json
+        val json2str = "{\"Aidan Gillen\": {\"array\": [\"Game of Thrones\",\"The Wire\"],\"string\": \"some string\",\"int\": \"2\",\"otherint\": 4, \"aboolean\": \"true\", \"boolean\": false,\"object\": {\"foo\": \"bar\"}},\"Amy Ryan\": [\"In Treatment\",\"The Wire\"],\"Annie Fitzgerald\": [\"True Blood\",\"Big Love\",\"The Sopranos\",\"Oz\"],\"Anwan Glover\": [\"Treme\",\"The Wire\"],\"Alexander Skarsg?rd\": [\"Generation Kill\",\"True Blood\"],\"Alice Farmer\": [\"The Corner\",\"Oz\",\"The Wire\"]}"
 
         //test 1 같은것
         jsonDiffService?.compareJson(json1str,json1str,"test1")

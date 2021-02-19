@@ -34,7 +34,7 @@ class JsonDiffService (val jsonDiffRepository : JsonDiffRepository){
             }
             return "OK"
 
-        }catch (e : Exception){ // 변화과 비교 과정에서 오류가 있다면
+        }catch (e : Exception){ // 변화와 비교 과정에서 오류가 있다면
             return "NO"
         }
 
@@ -128,47 +128,85 @@ class JsonDiffService (val jsonDiffRepository : JsonDiffRepository){
         val result = ArrayList<Any>() // 배열의 순서를 지키기위해 origin을 복사
         result.addAll(origin as Collection<Any>)
 
+        val com1 : ArrayList<Any> = if (json1.size >= json2.size) json1 as ArrayList<Any> else json2 as ArrayList<Any>;
+        val com2 : ArrayList<Any> = if (json1.size >= json2.size) json2 as ArrayList<Any> else json1 as ArrayList<Any>;
+        val comSet : HashSet<Any> = HashSet()
+        comSet.addAll(com1)
+        comSet.addAll(com2) //Set에 넣으므로 중복 index 제거
 
-        val com1 = if (json1.size >= json2.size) json1 else json2;
-        val com2 = if (json1.size >= json2.size) json2 else json1;
-
-        for (index in com1) {
-
-
-            if (!com2.contains(index)) {
-
-                if (index is Map<*, *>) {
-                    com2@ for (index2 in com2){
-                        if (index2 is Map<*, *>) {
-                            if (index.keys.containsAll(index2.keys)) {
-                                result[if (result.indexOf(index) != -1) result.indexOf(index) else result.indexOf(index2)] =
-                                    isMap(
-                                        index as Map<String, *>,
-                                        index2 as Map<String, *>,
-                                        origin[if (origin.indexOf(index) != -1) origin.indexOf(index) else origin.indexOf(
-                                            index2
-                                        )] as Map<String, *>
-                                    )
-                                break@com2 // 한번 비교가 끝난 맵은 비교하지 않는다.
-                            } else {
-                                if (result.contains(index)) {
-                                    result[result.indexOf(index)] = ("$index #json1에만 있는 인덱스");
-                                } else {
-                                    result.add("$index #json2에만 있는 인덱스");
-                                }
-                            }
-                        }
+        for (index in comSet){
+            if (index is Map<*, *>) { // 맵이라면
+                for (index2 in comSet){
+                    if (index != index2 &&
+                        index2 is Map<*, *> &&
+                        if(index.keys.size > index2.keys.size)index.keys.containsAll(index2.keys)else index2.keys.containsAll(index.keys)) { // key 값이 많은 기준으로 부분집합인지 확인한다.
+                        isMap(
+                            index as Map<String, *> , index2 as Map<String, *> ,
+                            origin[if (origin.indexOf(index) != -1) origin.indexOf(index) else origin.indexOf(index2)] as Map<String, *>
+                        )
                     }
+                }
 
-                } else
-                    if (result.contains(index)) {
+
+            }else if(index is List<*>){ // 리스트라면
+
+                for (index2 in comSet){
+                    if (index != index2 && index2 is List<*> &&
+                        if(index.size > index2.size)index.containsAll(index2) else index2.containsAll(index)){ // 인덱스 값이 많은 기준으로 부분집합인지 확인한다.
+                        isList(index , index2 ,  origin[if (origin.indexOf(index) != -1) origin.indexOf(index) else origin.indexOf(index2)] as List<*>)
+                    }
+                }
+
+            }else { // 맵도아니고 리스트도 아니기때문에 공통값이거나 다른값이다.
+                if (!(result.contains(index) && com1.contains(index) && com2.contains(index))){ // 중복이아니라면
+                    if(result.contains(index)){ // result가 오리진을 기준으로 만들었으므로
                         result[result.indexOf(index)] = ("$index #json1에만 있는 인덱스");
-                    } else {
+                    }else{
                         result.add("$index #json2에만 있는 인덱스");
                     }
-
+                }
             }
+
+
+
+
+
         }
+
+
+
+
+//            if(com2.contains(index)){
+//                continue;
+//            }
+//            if (index is Map<*, *>) {
+//                    com2@ for (index2 in com2){
+//                        if (index2 is Map<*, *>) {
+//                            if (index.keys.containsAll(index2.keys)) {
+//                                result[if (result.indexOf(index) != -1) result.indexOf(index) else result.indexOf(index2)] =
+//                                    isMap(
+//                                        index as Map<String, *>,
+//                                        index2 as Map<String, *>,
+//                                        origin[if (origin.indexOf(index) != -1) origin.indexOf(index) else origin.indexOf(
+//                                            index2
+//                                        )] as Map<String, *>
+//                                    )
+//                                break@com2 // 한번 비교가 끝난 맵은 비교하지 않는다.
+//                            } else {
+//                                if (result.contains(index)) {
+//                                    result[result.indexOf(index)] = ("$index #json1에만 있는 인덱스");
+//                                } else {
+//                                    result.add("$index #json2에만 있는 인덱스");
+//                                }
+//                            }
+//                        }
+//                    }
+//
+//
+//                }else{
+//
+//                }
+
 
 
 
