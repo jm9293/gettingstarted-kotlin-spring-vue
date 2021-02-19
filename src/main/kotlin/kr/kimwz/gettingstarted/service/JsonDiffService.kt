@@ -194,11 +194,7 @@ class JsonDiffService (val jsonDiffRepository : JsonDiffRepository){
                 }
 
             }else { // 맵도아니고 리스트도 아니기때문에 공통값이거나 다른값이다.
-                println(index)
-                println(originBuf)
-                println(com2Buf)
-                println(result)
-                println()
+
                 if (!(origin.contains(index) && com1.contains(index) && com2.contains(index) && !originRemove.contains(index))){ // 중복이아니거나 한번 중복이 존재하는 숫자라면
                     if(originBuf.contains(index) && !com2Buf.contains(index)){ // result가 오리진을 기준으로 만들었으므로
                         result.add("$index #json1에만 있는 인덱스");
