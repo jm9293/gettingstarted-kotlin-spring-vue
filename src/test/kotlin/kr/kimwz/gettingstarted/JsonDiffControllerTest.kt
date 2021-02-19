@@ -1,8 +1,10 @@
 package kr.kimwz.gettingstarted
 
 
+import kr.kimwz.gettingstarted.repository.JsonDiffRepository
 import kr.kimwz.gettingstarted.service.JsonDiffService
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
@@ -12,7 +14,11 @@ import org.springframework.boot.test.context.SpringBootTest
 class JsonDiffControllerTest() {
 
     @Autowired
+    private val jsonDiffRepository : JsonDiffRepository? = null
+
+    @Autowired
     private val jsonDiffService: JsonDiffService? = null
+
 
     @Test
     fun test() {
@@ -35,6 +41,8 @@ class JsonDiffControllerTest() {
         val res2 = jsonDiffService?.findDiffJson("test2")
 
         assert(res2?.bool == "false");
+
+        jsonDiffRepository?.deleteAll();
 
     }
 
