@@ -128,8 +128,29 @@ class JsonDiffService(val jsonDiffRepository: JsonDiffRepository) {
 
                     result[key] = "null #다른타입"
 
-                }else { // 프로퍼티는 같지만 타입 불일치
-                    result[key] = origin[key].toString() + " #다른타입"
+                } else { // 프로퍼티는 같지만 타입 불일치
+                    val type : String
+                    val another : Any?
+                    if(origin == com1){
+                        another = com2[key]
+                    }else{
+                        another = com1[key]
+                    }
+
+                    if(another is Map < * , * >){
+                        type = "Object"
+                    }else if(another is List<*>){
+                        type = "Array"
+                    }else if(another is Number){
+                        type =  "Number"
+                    }else if(another is String){
+                        type = "String"
+                    }else {
+                        type = "Boolean"
+                    }
+
+                    result[key] = origin[key].toString() + " #다른타입 (" + type +")"
+
                 }
 
             } else { // com2에만 있는 프로퍼티

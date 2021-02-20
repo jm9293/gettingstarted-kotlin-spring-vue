@@ -86,6 +86,7 @@ export default {
 
       }).catch(() => {
         alert("서버와 통신이 안되거나 서버내부오류입니다.")
+        this.$router.push("/jsonDiff")
       })
 
 
