@@ -134,9 +134,16 @@ class JsonDiffService(val jsonDiffRepository: JsonDiffRepository) {
 
             } else { // com2에만 있는 프로퍼티
                 if (origin.containsKey(key))
-                    result[key] = "#json"+offset+"에만 있는 프로퍼티";
-//                else
-//                    result[key] = "#json"+offset2+"에만 있는 프로퍼티";
+                    if(com1[key] is List<*> ){//map 이나 리스트라면 축약표현
+                        result[key] = com1[key].toString().substring(0, 4) + "...] #json"+offset+"에만 있는 프로퍼티"
+                    } else if(com1[key] is  Map<*, *> ){
+                        result[key] = com1[key].toString().substring(0, 4) + "...} #json"+offset+"에만 있는 프로퍼티"
+                    } else if(com1[key] == null){
+                        result[key] = "null #json"+offset+"에만 있는 프로퍼티"
+                    } else{
+                        result[key] = com1[key].toString() + " #json"+offset+"에만 있는 프로퍼티";
+                    }
+
             }
 
 
@@ -148,7 +155,6 @@ class JsonDiffService(val jsonDiffRepository: JsonDiffRepository) {
     private fun isList(json1: List<*>, json2: List<*>, origin: List<*> , offset : Int): List<*> {
 
         val result = ArrayList<Any>()
-        val offset2 = if(offset==1) 2 else 1
 
         val com1: ArrayList<Any> = if (json1.size >= json2.size) json1 as ArrayList<Any> else json2 as ArrayList<Any>;
         val com2: ArrayList<Any> = if (json1.size >= json2.size) json2 as ArrayList<Any> else json1 as ArrayList<Any>;
@@ -215,8 +221,6 @@ class JsonDiffService(val jsonDiffRepository: JsonDiffRepository) {
                 ) { // 중복이아니거나 한번 중복이 존재하는 숫자라면
                     if (originBuf.contains(index)) {
                         result.add("$index #json$offset 에만 있는 인덱스");
-                    } else {
-                        //result.add("$index #json$offset2 에만 있는 인덱스");
                     }
                 } else {
                     result.add(index)

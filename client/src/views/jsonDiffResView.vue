@@ -22,7 +22,7 @@
           <v-banner elevation="1" single-line>Json2</v-banner>
           <v-textarea
               filled
-              name="result1"
+              name="result2"
               v-model="result2"
               v-bind:rows="rows2"
               readonly
