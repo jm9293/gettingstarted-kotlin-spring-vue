@@ -124,10 +124,6 @@ class JsonDiffService(val jsonDiffRepository: JsonDiffRepository) {
 
                     result[key] = "#null" //null인글자가 있을수 있으므로
 
-                } else if (origin[key] == null) {
-
-                    result[key] = "null #다른타입"
-
                 } else { // 프로퍼티는 같지만 타입 불일치
                     val type : String
                     val another : Any?
@@ -145,7 +141,9 @@ class JsonDiffService(val jsonDiffRepository: JsonDiffRepository) {
                         type =  "Number"
                     }else if(another is String){
                         type = "String"
-                    }else {
+                    }else if(another == null){
+                        type = "Null"
+                    }else{
                         type = "Boolean"
                     }
 
