@@ -29,15 +29,15 @@ class JsonDiffController(val jsonDiffService: JsonDiffService) {
     fun findDiff(key : String) : DiffJsonResponse{
 
         if(key.isEmpty()){
-            return DiffJsonResponse("NO",null , null)
+            return DiffJsonResponse("NO",null , null , null)
         }
 
         val res = jsonDiffService.findDiffJson(key)
 
         return if(res!=null){
-            DiffJsonResponse("OK", res.bool , res.result)
+            DiffJsonResponse("OK", res.bool , res.result1 , res.result2)
         }else{
-            DiffJsonResponse("NO",null , null)
+            DiffJsonResponse("NO",null , null , null)
         }
     }
 
@@ -47,4 +47,4 @@ class JsonDiffController(val jsonDiffService: JsonDiffService) {
 }
 
 data class DiffJsonRequest(val json1 : String, val json2 : String)
-data class DiffJsonResponse(val status : String ,val bool : String?, val result : String?)
+data class DiffJsonResponse(val status : String ,val bool : String?, val result1 : String? , val result2 : String?)

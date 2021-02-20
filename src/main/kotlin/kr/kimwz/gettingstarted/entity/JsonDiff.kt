@@ -14,6 +14,8 @@ class JsonDiff {
     @Column(nullable = false)
     var bool : String? = null
     @Column(columnDefinition = "TEXT", nullable = false)
-    var result : String? =null
+    var result1 : String? =null
+    @Column(columnDefinition = "TEXT", nullable = false)
+    var result2 : String? =null
 
 }

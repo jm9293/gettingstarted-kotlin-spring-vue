@@ -49,6 +49,7 @@
 <script>
 import axios from "axios"
 import sha256 from 'crypto-js/sha256';
+
 export default {
   name : "jsonDiff",
 
@@ -80,8 +81,8 @@ export default {
 
 
       let data = {
-        "json1" : JSON.stringify(json1),
-        "json2" : JSON.stringify(json2)
+        "json1" : JSON.stringify(json1 , this.nullReplace ,1),
+        "json2" : JSON.stringify(json2 , this.nullReplace ,1)
       }
 
       axios.post("http://localhost:8765/jsondiff?key=" + param , data).then((res)=>{ // 서버에 보낸후 결과 값을 보기위해 push
@@ -104,17 +105,23 @@ export default {
     inputOfJSON(num){ // 복붙했을때 json 형식이 맞으면 변환
       try {
         if(num===1){
-          console.log("s")
           let json = JSON.parse(this.json1);
-          this.json1 = JSON.stringify(json,null,2)
+          this.json1 = JSON.stringify(json,this.nullReplace,2)
         }else{
           let json = JSON.parse(this.json2);
-          this.json2 = JSON.stringify(json,null,2)
+          this.json2 = JSON.stringify(json,this.nullReplace,2)
         }
 
       } catch (error){}
 
     },
+
+    nullReplace(key, value) {
+      if(value == null){
+        return null
+      }
+      return value
+    }
 
 
   }
