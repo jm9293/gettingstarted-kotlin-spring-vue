@@ -135,9 +135,9 @@ class JsonDiffService(val jsonDiffRepository: JsonDiffRepository) {
             } else { // com2에만 있는 프로퍼티
                 if (origin.containsKey(key))
                     if(com1[key] is List<*> ){//map 이나 리스트라면 축약표현
-                        result[key] = com1[key].toString().substring(0, 4) + "...] #json"+offset+"에만 있는 프로퍼티"
+                        result[key] = "[...] #json"+offset+"에만 있는 프로퍼티"
                     } else if(com1[key] is  Map<*, *> ){
-                        result[key] = com1[key].toString().substring(0, 4) + "...} #json"+offset+"에만 있는 프로퍼티"
+                        result[key] = "{...} #json"+offset+"에만 있는 프로퍼티"
                     } else if(com1[key] == null){
                         result[key] = "null #json"+offset+"에만 있는 프로퍼티"
                     } else{
