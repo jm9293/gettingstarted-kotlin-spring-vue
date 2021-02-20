@@ -37,7 +37,10 @@
         </v-col>
       </v-row>
       <v-row>
-        <v-col cols="10" id="diffBtn">
+        <v-col cols="10" class="diffBtn">
+          <v-btn block @click="sample">샘플데이터 입력</v-btn>
+        </v-col>
+        <v-col cols="10" class="diffBtn">
           <v-btn block @click="diff">비교하기</v-btn>
         </v-col>
       </v-row>
@@ -121,6 +124,93 @@ export default {
         return null
       }
       return value
+    },
+
+    sample(){
+      this.json1= "{\n" +
+          "  \"Aidan Gillen\": {\n" +
+          "    \"array\": [\n" +
+          "      \"Game of Thron\\\"es\",\n" +
+      "      \"The Wire\"\n" +
+      "    ],\n" +
+      "    \"string\": \"some string\",\n" +
+      "    \"int\": 2,\n" +
+      "    \"aboolean\": true,\n" +
+      "    \"boolean\": true,\n" +
+      "    \"object\": {\n" +
+      "      \"foo\": \"bar\",\n" +
+      "      \"object1\": {\n" +
+      "        \"new prop1\": \"new prop value\"\n" +
+      "      },\n" +
+      "      \"object2\": {\n" +
+      "        \"new prop1\": \"new prop value\"\n" +
+      "      },\n" +
+      "      \"object3\": {\n" +
+      "        \"new prop1\": \"new prop value\"\n" +
+      "      },\n" +
+      "      \"object4\": {\n" +
+      "        \"new prop1\": \"new prop value\"\n" +
+      "      }\n" +
+      "    }\n" +
+      "  },\n" +
+      "  \"Amy Ryan\": {\n" +
+      "    \"one\": \"In Treatment\",\n" +
+      "    \"two\": \"The Wire\"\n" +
+      "  },\n" +
+      "  \"Annie Fitzgerald\": [\n" +
+      "    \"Big Love\",\n" +
+      "    \"True Blood\"\n" +
+      "  ],\n" +
+      "  \"Anwan Glover\": [\n" +
+      "    \"Treme\",\n" +
+      "    \"The Wire\"\n" +
+      "  ],\n" +
+      "  \"Alexander Skarsgard\": [\n" +
+      "    \"Generation Kill\",\n" +
+      "    \"True Blood\"\n" +
+      "  ],\n" +
+      "  \"Clarke Peters\": null\n" +
+      "}" ;
+
+      this.json2 = "{\n" +
+          "  \"Aidan Gillen\": {\n" +
+          "    \"array\": [\n" +
+          "      \"Game of Thrones\",\n" +
+          "      \"The Wire\"\n" +
+          "    ],\n" +
+          "    \"string\": \"some string\",\n" +
+          "    \"int\": \"2\",\n" +
+          "    \"otherint\": 4,\n" +
+          "    \"aboolean\": \"true\",\n" +
+          "    \"boolean\": false,\n" +
+          "    \"object\": {\n" +
+          "      \"foo\": \"bar\"\n" +
+          "    }\n" +
+          "  },\n" +
+          "  \"Amy Ryan\": [\n" +
+          "    \"In Treatment\",\n" +
+          "    \"The Wire\"\n" +
+          "  ],\n" +
+          "  \"Annie Fitzgerald\": [\n" +
+          "    \"True Blood\",\n" +
+          "    \"Big Love\",\n" +
+          "    \"The Sopranos\",\n" +
+          "    \"Oz\"\n" +
+          "  ],\n" +
+          "  \"Anwan Glover\": [\n" +
+          "    \"Treme\",\n" +
+          "    \"The Wire\"\n" +
+          "  ],\n" +
+          "  \"Alexander Skarsg?rd\": [\n" +
+          "    \"Generation Kill\",\n" +
+          "    \"True Blood\"\n" +
+          "  ],\n" +
+          "  \"Alice Farmer\": [\n" +
+          "    \"The Corner\",\n" +
+          "    \"Oz\",\n" +
+          "    \"The Wire\"\n" +
+          "  ]\n" +
+          "}"
     }
 
 
@@ -132,7 +222,7 @@ export default {
 </script>
 
 <style scoped>
-  #diffBtn{
+  .diffBtn{
     margin: auto;
   }
 
