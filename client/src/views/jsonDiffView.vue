@@ -7,7 +7,7 @@
 import JsonDiff from "@/components/JsonDiff";
 
 export default {
-  name: "jsonDiffVeiw",
+  name: "jsonDiffView",
   components : {
     JsonDiff
   }

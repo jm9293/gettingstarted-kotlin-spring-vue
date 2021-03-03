@@ -1,7 +1,7 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import Log from '@/views/log.vue'
-import JsonDiff from "@/views/jsonDiffVeiw.vue";
+import JsonDiff from "@/views/jsonDiffView.vue";
 import JsonDiffRes from '@/views/jsonDiffResView.vue'
 
 

@@ -30,7 +30,6 @@ class JsonDiffService(val jsonDiffRepository: JsonDiffRepository) {
                 jsonDiff.result1 = compareResult.result1
                 jsonDiff.result2 = compareResult.result2
                 jsonDiff.param = param
-                println()
                 jsonDiffRepository.save(jsonDiff)
             }
             return "OK"
@@ -195,41 +194,52 @@ class JsonDiffService(val jsonDiffRepository: JsonDiffRepository) {
         comAll.addAll(com1)
         comAll.addAll(com2Buf)
 
-        for (index in comAll) {
+        var comAllIter : MutableIterator<Any> = comAll.iterator() // 이터레이터 생성
+
+
+        while (comAllIter.hasNext()) {
+
+            var index = comAllIter.next();
+
             if (index is Map<*, *>) { // 맵이라면
-                for (index2 in comAll) {
+                var comAllIter2 : MutableIterator<Any> = comAll.iterator() //또다른 이터레이터 생성
+                while (comAllIter2.hasNext()){
+                var index2 = comAllIter2.next();
                     if (index != index2 &&
                         index2 is Map<*, *> &&
                         if (index.keys.size > index2.keys.size) index.keys.containsAll(index2.keys) else index2.keys.containsAll(
-                            index.keys
-                        )
-                    ) { // key 값이 많은 기준으로 부분집합인지 확인한다.
-                        isMap(
+                            index.keys)) { // key 값이 많은 기준으로 부분집합인지 확인한다.
+                        result.add(isMap(
                             index as Map<String, *>, index2 as Map<String, *>,
                             origin[if (origin.indexOf(index) != -1) origin.indexOf(index) else origin.indexOf(index2)] as Map<String, *> ,offset
-                        )
-                        comAll.remove(index) // 값을 지운다
-                        comAll.remove(index2) // 값을 지운다
+                        ))
+
+                        comAll.remove(index) // 다시 비교 되지 않도록 삭제
+
                     }
 
                 }
 
 
             } else if (index is List<*>) { // 리스트라면
-
-                for (index2 in comAll) {
+                var comAllIter2 : MutableIterator<Any> = comAll.iterator() // 또다른 이터레이터 생성s
+                while (comAllIter2.hasNext()){
+                    var index2 = comAllIter2.next();
                     if (index != index2 && index2 is List<*> &&
                         if (index.size > index2.size) index.containsAll(index2) else index2.containsAll(index)
-                    ) { // 인덱스 값이 많은 기준으로 부분집합인지 확인한다.
-                        isList(
+                                ) { // 인덱스 값이 많은 기준으로 부분집합인지 확인한다.
+                        result.add(isList(
                             index,
                             index2,
                             origin[if (origin.indexOf(index) != -1) origin.indexOf(index) else origin.indexOf(index2)] as List<*>,
                             offset
-                        )
-                        comAll.remove(index) // 값을 지운다
-                        comAll.remove(index2)
+                        ))
+                        comAll.remove(index) // 다시 비교 되지 않도록 삭제
                     }
+                }
+
+                if(origin.contains(index) && comAll.contains(index)){ // 원본에 존재하고 아직 공통배열에 남아있다면 원본에만 있는 리스트로 간
+                    result.add("$index #json$offset 에만 있는 인덱스");
                 }
 
             } else { // 맵도아니고 리스트도 아니기때문에 공통값이거나 다른값이다.
