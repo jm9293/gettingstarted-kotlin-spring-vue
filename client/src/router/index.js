@@ -3,7 +3,7 @@ import VueRouter from "vue-router";
 import Log from '@/views/log.vue'
 import JsonDiff from "@/views/jsonDiffView.vue";
 import JsonDiffRes from '@/views/jsonDiffResView.vue'
-
+import test from '@/views/test.vue'
 
 Vue.use(VueRouter);
 
@@ -28,6 +28,12 @@ const routes = [
         path: "/jsonDiffRes",
         name: "jsonDiffRes",
         component : JsonDiffRes
+    },
+
+    {
+        path: "/test",
+        name: "test",
+        component : test
     },
 
 

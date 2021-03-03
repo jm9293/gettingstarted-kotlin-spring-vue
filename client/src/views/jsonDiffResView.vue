@@ -55,7 +55,7 @@ export default {
   created() {
     if (this.$route.query.key) {
       this.getResult(this.$route.query.key);
-    } else { //key 가 없다면
+    } else {
       this.$router.push("/jsonDiff")
     }
 

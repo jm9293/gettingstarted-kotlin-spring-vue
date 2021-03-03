@@ -84,8 +84,8 @@ export default {
 
 
       let data = {
-        "json1" : JSON.stringify(json1 , this.nullReplace ,1),
-        "json2" : JSON.stringify(json2 , this.nullReplace ,1)
+        "json1" : JSON.stringify(json1 , null ,1),
+        "json2" : JSON.stringify(json2 , null ,1)
       }
 
       axios.post("http://localhost:8765/jsondiff?key=" + param , data).then((res)=>{ // 서버에 보낸후 결과 값을 보기위해 push
@@ -109,25 +109,20 @@ export default {
       try {
         if(num===1){
           let json = JSON.parse(this.json1);
-          this.json1 = JSON.stringify(json,this.nullReplace,2)
+          this.json1 = JSON.stringify(json,null,2)
         }else{
           let json = JSON.parse(this.json2);
-          this.json2 = JSON.stringify(json,this.nullReplace,2)
+          this.json2 = JSON.stringify(json,null,2)
         }
 
       } catch (error){}
 
     },
 
-    nullReplace(key, value) {
-      if(value == null){
-        return null
-      }
-      return value
-    },
 
     sample(){
-      this.json1= "{\n" +
+      this.json1= "" +
+          "{\n" +
           "  \"Aidan Gillen\": {\n" +
           "    \"array\": [\n" +
           "      \"Game of Thron\\\"es\",\n" +
