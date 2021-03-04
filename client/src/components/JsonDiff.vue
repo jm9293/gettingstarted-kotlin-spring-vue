@@ -80,7 +80,7 @@ export default {
       }
 
 
-      let param = sha256(this.json1).toString() + sha256(this.json2).toString()
+      let param = sha256(this.json1+this.json2).toString()
 
 
       let data = {

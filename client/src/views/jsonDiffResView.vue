@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-container fluid>
+    <v-container fluid v-if = ready>
       <v-row>
         <v-col cols-12>
           <v-banner elevation="1" single-line>비교결과 <strong>{{bool}}</strong></v-banner>
@@ -13,7 +13,7 @@
         </v-col>
         <v-col cols="6">
           <v-banner elevation="1" single-line>Json2</v-banner>
-          <json-box :json-data="result2"></json-box>
+<!--          <json-box :json-data="result2"></json-box>-->
         </v-col>
       </v-row>
       <v-row>
@@ -42,7 +42,8 @@ export default {
       rows1: 3,
       result2: null,
       rows2: 3,
-      bool : ""
+      bool : "",
+      ready : false
     }
   },
   created() {
@@ -65,6 +66,7 @@ export default {
 
           this.bool = res["data"]["bool"] == "true" ? '일치' : '불일치'
 
+          this.ready = true
         } else {
           alert("검색결과가 없습니다.")
           this.$router.push("/jsonDiff")
@@ -74,7 +76,6 @@ export default {
         alert("서버와 통신이 안되거나 서버내부오류입니다.")
         this.$router.push("/jsonDiff")
       })
-
 
     },
 
@@ -94,4 +95,9 @@ export default {
 #diffBtn {
   margin: auto;
 }
+
+v-col{
+  overflow: hidden;
+}
+
 </style>
