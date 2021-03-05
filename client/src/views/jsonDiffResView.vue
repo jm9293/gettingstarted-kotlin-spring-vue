@@ -1,19 +1,32 @@
 <template>
   <div>
-    <v-container fluid v-if = ready>
+    <v-container fluid v-if="equalBool!=null">
       <v-row>
         <v-col cols-12>
-          <v-banner elevation="1" single-line>비교결과 <strong>{{bool}}</strong></v-banner>
+          <v-banner elevation="1" single-line>비교결과 <strong>{{ equalBool }}</strong></v-banner>
         </v-col>
       </v-row>
       <v-row>
-        <v-col cols="6">
+        <v-col cols="5">
+          <div class="json">
           <v-banner elevation="1" single-line>Json1</v-banner>
-          <json-box :json-data="result1"></json-box>
+          <json-box :json-data="json1" :diff="diffData1"></json-box>
+          </div>
         </v-col>
-        <v-col cols="6">
+        <v-col cols="5">
+          <div class="json">
           <v-banner elevation="1" single-line>Json2</v-banner>
-        <json-box :json-data="result2"></json-box>
+          <json-box :json-data="json2" :diff="diffData2"></json-box>
+          </div>
+        </v-col>
+        <v-col cols="2">
+          <v-banner elevation="1" single-line>차이점</v-banner>
+          <v-textarea
+              filled
+              v-model="$store.state.diffMessage"
+              rows="20"
+              readonly
+          ></v-textarea>
         </v-col>
       </v-row>
       <v-row>
@@ -38,21 +51,20 @@ export default {
 
   data() {
     return {
-      result1: null,
-      rows1: 3,
-      result2: null,
-      rows2: 3,
-      bool : "",
-      ready : false
+      json1: null,
+      diffData1: null,
+      json2: null,
+      diffData2: null,
+      equalBool: null,
     }
   },
   created() {
-    if (this.$route.query.key) {
+    if (this.$route.query.key)
       this.getResult(this.$route.query.key);
-    } else {
+    else
       this.$router.push("/jsonDiff")
-    }
 
+    this.$store.commit('changeMessage' , {message : "  해당 줄을 클릭하면 메세지가 나옵니다."});
   },
 
   methods: {
@@ -60,13 +72,11 @@ export default {
       axios.get("http://localhost:8765/jsondiff?key=" + key).then((res) => {
 
         if (res["data"]["status"] == "OK") { // 검색결과가 있을 경우
-
-          this.result1  = JSON.parse(res["data"]["result1"])
-          this.result2 = JSON.parse(res["data"]["result2"])
-
-          this.bool = res["data"]["bool"] == "true" ? '일치' : '불일치'
-
-          this.ready = true
+          this.json1 = res["data"]["json1"]
+          this.json2 = res["data"]["json2"]
+          this.diffData1 = JSON.parse(res["data"]["result1"])
+          this.diffData2 = JSON.parse(res["data"]["result2"])
+          this.equalBool = res["data"]["equalBool"] == true ? '일치' : '불일치'
         } else {
           alert("검색결과가 없습니다.")
           this.$router.push("/jsonDiff")
@@ -79,25 +89,16 @@ export default {
 
     },
 
-    nullReplace(key, value){
-      if(value == "#null"){ // 치환
-        return null
-      }
-      return value
-    }
-
-
   }
 }
 </script>
 
 <style scoped>
+
 #diffBtn {
   margin: auto;
 }
-
-v-col{
-  overflow: hidden;
+.json {
+  overflow: auto;
 }
-
 </style>

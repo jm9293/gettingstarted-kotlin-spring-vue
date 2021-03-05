@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.Query
 
 interface JsonDiffRepository : JpaRepository<JsonDiff , Long> {
 
-    fun findByParam(param : String) : JsonDiff
+    fun findByKey(key : String) : JsonDiff
 
 }

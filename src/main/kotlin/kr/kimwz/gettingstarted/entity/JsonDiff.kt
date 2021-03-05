@@ -9,10 +9,14 @@ class JsonDiff {
     @Id
     @GeneratedValue
     var id : Long = 0L
-    @Column(columnDefinition = "TEXT", nullable = false)
-    var param : String? = null
+    @Column(columnDefinition = "TEXT", nullable = false , length = 64)
+    var key : String? = null
     @Column(nullable = false)
-    var bool : String? = null
+    var equalBoolean : Int = 0
+    @Column(columnDefinition = "TEXT", nullable = false)
+    var json1 : String? = null
+    @Column(columnDefinition = "TEXT", nullable = false)
+    var json2 : String? = null
     @Column(columnDefinition = "TEXT", nullable = false)
     var result1 : String? =null
     @Column(columnDefinition = "TEXT", nullable = false)

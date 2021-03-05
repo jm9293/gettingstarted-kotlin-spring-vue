@@ -4,22 +4,20 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kr.kimwz.gettingstarted.entity.JsonDiff
 import kr.kimwz.gettingstarted.repository.JsonDiffRepository
-import org.springframework.context.annotation.Scope
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.stereotype.Service
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 @Service
 class JsonDiffService(val jsonDiffRepository: JsonDiffRepository) {
 
 
-    fun compareJson(Json1: String, Json2: String, param: String): String {
+    fun compareJson(json1: String, json2: String, key: String): Boolean {
 
         try {
             val res: JsonDiff? = try {
-                jsonDiffRepository.findByParam(param)
+                jsonDiffRepository.findByKey(key)
             } catch (e: EmptyResultDataAccessException) { // 정보가 아예 없다면
                 null
             }
@@ -28,24 +26,26 @@ class JsonDiffService(val jsonDiffRepository: JsonDiffRepository) {
             if (res == null) { // DB에 없는거라면 diff 값저장
 
                 val jsonDiff = JsonDiff()
-                val compareResult = compare(Json1, Json2)
+                val compareResult = compare(json1, json2)
 
-                jsonDiff.bool = compareResult.bool
+                jsonDiff.equalBoolean = compareResult.bool
+                jsonDiff.json1 = compareResult.json1
+                jsonDiff.json2 = compareResult.json2
                 jsonDiff.result1 = compareResult.result1
                 jsonDiff.result2 = compareResult.result2
-                jsonDiff.param = param
+                jsonDiff.key = key
 
                 jsonDiffRepository.save(jsonDiff)
 
             }
 
-            return "OK"
+            return true
 
         } catch (e: Exception) { // 변화와 비교 과정에서 오류가 있다면
 
             e.printStackTrace()
 
-            return "NO"
+            return false
         }
 
     }
@@ -53,13 +53,13 @@ class JsonDiffService(val jsonDiffRepository: JsonDiffRepository) {
     fun findDiffJson(key: String): DiffJsonResult? {
 
         val res: JsonDiff? = try {
-            jsonDiffRepository.findByParam(key)
+            jsonDiffRepository.findByKey(key)
         } catch (e: EmptyResultDataAccessException) { // 정보가 아예 없다면
             null
         }
 
         return if (res != null) {
-            DiffJsonResult(res.bool.toString(), res.result1.toString(), res.result2.toString())
+            DiffJsonResult(res.equalBoolean , res.json1, res.json2 ,res.result1.toString(), res.result2.toString())
         } else {
             null
         }
@@ -67,29 +67,41 @@ class JsonDiffService(val jsonDiffRepository: JsonDiffRepository) {
     }
 
 
-    private fun compare(Json1: String, Json2: String): DiffJsonResult {
+    private fun compare(jsonStr1: String, jsonStr2: String): DiffJsonResult {
 
         val mapper = jacksonObjectMapper()
         val diffJsonResult = DiffJsonResult()
+        val diffOffSet1 = DiffOffSet(1)
+        val diffOffSet2 = DiffOffSet(2)
+
+        if (jsonStr1[0] == '{' && jsonStr1[jsonStr1.length - 1] == '}' && jsonStr2[0] == '{' && jsonStr2[jsonStr2.length - 1] == '}') { // 비교대상이 맵일때
+
+            val json1 = mapper.readValue<MutableMap<String, Any>>(jsonStr1)
+            val json2 = mapper.readValue<MutableMap<String, Any>>(jsonStr2)
+
+            compareMap("", json1, json2, diffOffSet1)
+            compareMap("", json2, json1, diffOffSet2)
+
+            diffJsonResult.bool = if(json1 == json2) 1 else 0
+            diffJsonResult.json1 = jsonStr1
+            diffJsonResult.json2 = jsonStr2
+            diffJsonResult.result1 = mapper.writeValueAsString(diffOffSet1.diffData)
+            diffJsonResult.result2 = mapper.writeValueAsString(diffOffSet2.diffData)
 
 
-        if (Json1[0] == '{' && Json1[Json1.length - 1] == '}' && Json2[0] == '{' && Json2[Json2.length - 1] == '}') { // 비교대상이 맵일때
+        } else if (jsonStr1[0] == '[' && jsonStr1[jsonStr1.length - 1] == ']' && jsonStr2[0] == '[' && jsonStr2[jsonStr2.length - 1] == ']') { // 비교대상이 어레이일때
 
-            val json1 = mapper.readValue<MutableMap<String, Any>>(Json1)
-            val json2 = mapper.readValue<MutableMap<String, Any>>(Json2)
+            val json1 = mapper.readValue<List<Any>>(jsonStr1)
+            val json2 = mapper.readValue<List<Any>>(jsonStr2)
 
-            diffJsonResult.bool = (json1 == json2).toString()
-            diffJsonResult.result1 = mapper.writeValueAsString(compareMap("" , json1, json2, 1, Stack<Any>()))
-            diffJsonResult.result2 = mapper.writeValueAsString(compareMap("" , json2, json1, 2, Stack<Any>()))
+            compareList("", json1, json2, diffOffSet1)
+            compareList("", json2, json1, diffOffSet2)
 
-        } else if (Json1[0] == '[' && Json1[Json1.length - 1] == ']' && Json2[0] == '[' && Json2[Json2.length - 1] == ']') { // 비교대상이 어레이일때
-
-            val json1 = mapper.readValue<List<Any>>(Json1)
-            val json2 = mapper.readValue<List<Any>>(Json2)
-
-            diffJsonResult.bool = (json1 == json2).toString()
-            diffJsonResult.result1 = mapper.writeValueAsString(compareList("" , json1, json2, 1, Stack<Any>()))
-            diffJsonResult.result2 = mapper.writeValueAsString(compareList("" , json2, json1, 2, Stack<Any>()))
+            diffJsonResult.json1 = jsonStr1
+            diffJsonResult.json2 = jsonStr2
+            diffJsonResult.bool = if(json1 == json2) 1 else 0
+            diffJsonResult.result1 = mapper.writeValueAsString(diffOffSet1.diffData)
+            diffJsonResult.result2 = mapper.writeValueAsString(diffOffSet2.diffData)
 
         }
 
@@ -98,9 +110,9 @@ class JsonDiffService(val jsonDiffRepository: JsonDiffRepository) {
     }
 
 
-    private fun compareMap(path: Any, json1: Map<*, *>, json2: Map<*, *>, offset: Int, spotStack: Stack<Any>): Map<String, *> {
+    private fun compareMap(path: Any, json1: Map<*, *>, json2: Map<*, *>, diffOffSet: DiffOffSet) {
 
-        spotStack.push(path)
+        diffOffSet.spotStack.push(path)
 
         val origin = json1 as Map<String, Any?>
 
@@ -109,91 +121,88 @@ class JsonDiffService(val jsonDiffRepository: JsonDiffRepository) {
         val com1: Map<String, Any?> = if (json1.size >= json2.size) json1 else json2
         val com2: Map<String, Any?> = if (json1.size >= json2.size) json2 else json1
 
-        val result = HashMap<String, Any?>()
 
         for (key: String in com1.keys) {
 
             if (com2.containsKey(key)) {
 
-                if (com1[key] == null && com2[key] == null) {
-                    result[key] = null
-                } else if ((com1[key] == null || com2[key] == null) || (com1[key]!!::class != com2[key]!!::class)) { // 프로퍼티는 같지만 타입 불일치
+                if (com1[key] == null && com2[key] == null) continue
+                else if ((com1[key] == null || com2[key] == null) || (com1[key]!!::class != com2[key]!!::class)) { // 프로퍼티는 같지만 타입 불일치
 
                     val another: Any? = if (origin == com1) com2[key] else com1[key]
-                    val type = getType(another)
+                    createdResult(key, json1[key], another, 2,  diffOffSet)
 
-                    result[key] = createdResult(key, json1[key], null, "다른타입 ($type)","blue", spotStack)
+                } else when {
 
-                } else if (com1[key] is Map<*, *>) {
-                    result[key] =
-                        compareMap(key , json1[key] as Map<String, Any?>, json2[key] as Map<String, Any?>, offset, spotStack)
-                } else if (com1[key] is List<*>) {
-                    result[key] =
-                        compareList(key , json1[key] as List<Any?>, json2[key] as List<Any?>, offset, spotStack)
-                } else {
-                    result[key] =
-                        compareValue(key ,json1[key], json2[key] , spotStack) as Any
+                    com1[key] is Map<*, *> -> compareMap(
+                        key,
+                        json1[key] as Map<String, Any?>,
+                        json2[key] as Map<String, Any?>,
+                        diffOffSet
+                    )
+                    com1[key] is List<*> -> compareList(
+                        key,
+                        json1[key] as List<Any?>,
+                        json2[key] as List<Any?>,
+                        diffOffSet
+                    )
+                    else -> compareValue(key, json1[key], json2[key], diffOffSet) as Any
+
                 }
 
             } else {
                 if (origin.containsKey(key))
-                    result[key] = createdResult(key , origin[key], null, "json" + offset + "에만 있는 프로퍼티","pink", spotStack)
+                    createdResult(key, origin[key], null, 3, diffOffSet)
             }
 
         }
 
-        spotStack.pop()
+        diffOffSet.spotStack.pop()
 
-        return result;
     }
 
 
+    private fun compareList(path: Any, json1: List<*>, json2: List<*>, diffOffSet: DiffOffSet) {
 
-
-
-    private fun compareList(path : Any ,json1: List<*>, json2: List<*>, offset: Int, spotStack: Stack<Any>): List<*> {
-
-        spotStack.push(path)
+        diffOffSet.spotStack.push(path)
 
         val maxSize = if (json1.size > json2.size) json1.size else json2.size
-
-        val result = ArrayList<Any?>()
 
         for (i in 0..maxSize) {
 
             if (json1.size > i && json2.size > i) {
 
-                if (json1[i] == null && json2[i] == null) {
-                    result.add(null)
-                } else if ((json1[i] == null || json2[i] == null) || (json1[i]!!::class != json2[i]!!::class)) { // 인덱스 끼리 타입 불일치
-                    result.add(createdResult(i, json1[i], null, "다른타입 ("+getType(json2[i])+")", "blue" ,spotStack))
-                } else if (json1[i] is Map<*, *>) {
-                    result.add(compareMap(i, json1[i] as Map<String, Any?>, json2[i] as Map<String, Any?>, offset, spotStack))
-                } else if (json1[i] is List<*>) {
-                    result.add(compareList(i, json1[i] as List<Any?>, json2[i] as List<Any?>, offset, spotStack))
-                } else {
-                    result.add(compareValue(i, json1[i], json2[i] , spotStack) as Any)
+                if (json1[i] == null && json2[i] == null) continue
+                else if ((json1[i] == null || json2[i] == null) || (json1[i]!!::class != json2[i]!!::class))  // 인덱스 끼리 타입 불일치
+                    createdResult(i, json1[i], json2[i], 2 ,diffOffSet)
+                else when {
+                    json1[i] is Map<*, *> -> compareMap(
+                        i,
+                        json1[i] as Map<String, Any?>,
+                        json2[i] as Map<String, Any?>,
+                        diffOffSet
+                    )
+                    json1[i] is List<*> -> compareList(i, json1[i] as List<Any?>, json2[i] as List<Any?>, diffOffSet)
+                    else -> compareValue(i, json1[i], json2[i], diffOffSet) as Any
                 }
 
             } else {
                 if (json1.size > i)
-                    result.add(createdResult(i ,json1[i], null, "json$offset 에만 있는 인덱스", "pink" ,spotStack))
+                    createdResult(i, json1[i], null, 4,  diffOffSet)
             }
 
         }
 
-        spotStack.pop()
-
-        return result
+        diffOffSet.spotStack.pop()
 
     }
 
 
-    private fun compareValue(path: Any , json1: Any?, json2: Any? , spotStack: Stack<Any>): Any? {
+    private fun compareValue(path: Any, json1: Any?, json2: Any?, diffOffSet: DiffOffSet): Any? {
         return if (json1 == json2) {
             json1
         } else {
-            createdResult(path ,json1, json2, "다른 값" , "green",spotStack)
+            createdResult(path, json1, json2,1, diffOffSet)
         }
     }
 
@@ -210,42 +219,45 @@ class JsonDiffService(val jsonDiffRepository: JsonDiffRepository) {
     }
 
 
-    private fun createdResult(path: Any ,value: Any?, diffValue: Any?, message: String, color : String, spotStack: Stack<Any>): Map<*, *> {
+    private fun createdResult(
+        path: Any,
+        value: Any?,
+        diffValue: Any?,
+        case : Int,
+        diffOffSet: DiffOffSet
+    ) {
+        diffOffSet.spotStack.push(path)
 
         val resultMap = HashMap<String, Any?>()
+        val spot = diffOffSet.spotStack.joinToString("/")
+        val anotherOffset = if(diffOffSet.offset == 1) 2 else 1
 
-        spotStack.push(path)
-
-        resultMap["value"] = value
-        resultMap["diffValue"] = diffValue
-        resultMap["message"] = message
-        resultMap["spot"] = getSpotToString(spotStack);
-        resultMap["backgroundColor"] = color
-        println(resultMap["spot"].toString() + " | " +resultMap["message"].toString())
-
-        spotStack.pop()
-
-        return resultMap
-
-    }
-
-    private fun getSpotToString(spotStack: Stack<Any>): String {
-
-        var result = ""
-
-        for (spot in spotStack) {
-            result += "$spot/"
-        }
-
-        return result
-
+        resultMap["spot"] = spot
+        resultMap["case"] = case
+        resultMap["message"] =
+            when(case){
+                1 -> "json${diffOffSet.offset} : (${value}) 값이 다릅니다. \njson${anotherOffset} : (${diffValue})"
+                2 -> "json${diffOffSet.offset} : (${value}) 타입이 다릅니다. \njson${anotherOffset} : (${getType(diffValue)})"
+                3 -> "json${diffOffSet.offset} 에만 있는 프로퍼티"
+                4 -> "json${diffOffSet.offset} 에만 있는 인덱스"
+                else -> "No Message"
+            }
+        diffOffSet.diffData[spot] = resultMap
+        diffOffSet.spotStack.pop()
     }
 
 
 }
 
 data class DiffJsonResult(
-    var bool: String = "false",
+    var bool: Int = 0,
+    var json1: String? = null,
+    var json2: String? = null,
     var result1: String = "bodyTypeMissMatch",
     var result2: String = "bodyTypeMissMatch"
 )
+
+data class DiffOffSet(val offset: Int) {
+    val spotStack: Stack<Any> = Stack()
+    val diffData: HashMap<String, Any> = HashMap()
+}

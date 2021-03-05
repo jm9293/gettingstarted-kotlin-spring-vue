@@ -89,7 +89,7 @@ export default {
       }
 
       axios.post("http://localhost:8765/jsondiff?key=" + param , data).then((res)=>{ // 서버에 보낸후 결과 값을 보기위해 push
-            if(res["data"]=="OK"){
+            if(res["data"]["status"]=="OK"){
               this.$router.push("/jsonDiffRes?key=" + param)
             }else {
               alert("입력값이 잘못되었거나 서버 오류")

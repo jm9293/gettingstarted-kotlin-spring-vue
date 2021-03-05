@@ -1,34 +1,25 @@
 <template>
-  <span :style="style">{{item["value"]}}<hr/></span>
+  <span @click="click" :style='item["diffData"]["style"]'>{{item["value"]}}</span>
 </template>
 
 <script>
+
 export default {
   name: "jsonLine.vue",
-  props : ['index','item',"diffData"],
-  data(){
-    return{
-      style : this.getStyle()
+  props : ['index','item'],
+  methods : {
+    click(){
+      this.$store.commit('changeMessage' , {message : this.item["diffData"]["message"]});
     }
   },
-  methods : {
-    getStyle(){
-      for(let i in Object.keys(this.diffData)){
-        let key = Object.keys(this.diffData)[i]
-        if(key==this.item["spot"] || this.item["spot"].includes(key)){
-          return this.diffData[key]
-        }
-      }
-      return {}
-    }
-  }
-
 }
 
 
 </script>
 
 <style scoped>
+
+
 
 
 </style>

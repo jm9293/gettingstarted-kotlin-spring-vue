@@ -3,7 +3,7 @@
     <div class="numberBox">
       <div class="numberLine" v-for="item in row">{{ item }}</div>
     </div>
-    <pre><json-line class="jsonLine" v-for="item in jsonList" :item="item" :diffData = "diffData"></json-line></pre>
+    <pre><json-line class="jsonLine" v-for="item in jsonList" :item="item"></json-line></pre>
   </div>
 </template>
 
@@ -22,28 +22,19 @@ export default {
       row: 0,
       diffResult: {},
       dep: [],
-      diffData : {}
+      caseStyles :[
+        {backgroundColor: "rgba(50, 57, 88, 0.1)"},
+        {backgroundColor: "#cef"},
+        {backgroundColor: "rgba(220, 100, 100, 0.1)"},
+        {backgroundColor: "rgba(0, 160, 80, 0.1)"}
+      ]
     }
   },
 
-  props: ["jsonData"],
+  props: ["jsonData", "diff"],
 
 
   methods: {
-
-    getJsonList(json) {
-      return JSON.stringify(json, this.diffDataParse, " ").split(/\n/)
-    },
-
-    diffDataParse(key, value) {
-
-      if (value instanceof Object && value.hasOwnProperty('value')) {
-        this.diffData[value["spot"]] = {backgroundColor : value["backgroundColor"]}
-        return value["value"]
-      }
-      return value
-
-    },
 
     spotSave(value, index, array) {
 
@@ -61,7 +52,7 @@ export default {
         this.dep.pop()
         array[index] = {spot: this.spotToString(this.dep), value: value}
         this.dep.pop()
-      } else if (value[value.length - 1] == ',' || value[value.length - 1] == '"') {
+      } else if (value[value.length - 1] == ',' || value[value.length - 1] == '"' || value.trim()[0] == '"') {
         if (typeof (this.dep[this.dep.length - 1]) == "number") {
           this.dep[this.dep.length - 1]++
           array[index] = {spot: this.spotToString(this.dep), value: value}
@@ -71,6 +62,8 @@ export default {
           this.dep.pop()
         }
       }
+
+      array[index]["diffData"] = this.getDiffValue(array[index]["spot"] , this.diff)
 
     },
 
@@ -84,15 +77,26 @@ export default {
         }
       }
       return result
+    },
+
+    getDiffValue(spot , diffData){
+      for(let i in Object.keys(diffData)){
+        let key = Object.keys(diffData)[i]
+        if(key==spot || spot.includes(key)){
+          return {style : this.caseStyles[diffData[key]["case"]-1] , message : diffData[key]["message"]}
+        }
+      }
+      return {style: {}, message: ""}
     }
 
   },
 
   created() {
-    this.jsonList = this.getJsonList(this.jsonData)
+
+    this.jsonList = this.jsonData.split(/\n/)
     this.jsonList.forEach(this.spotSave)
     this.row = this.jsonList.length
-    console.log(this.diffResult)
+
   }
 
 
@@ -105,16 +109,16 @@ export default {
 }
 
 .jsonBox {
-  overflow: auto;
   width: 100%;
   margin-top: 10px;
+  min-width: 640px;
 }
 
 .jsonLine {
   display: block;
   font-size: 1rem;
   max-height: 18px;
-  width: 640px;
+  width: 100%;
   box-sizing: border-box;
   border-radius: 10px;
   padding: 0 10px;
@@ -126,13 +130,11 @@ export default {
 }
 
 .numberLine {
-  background-color: bisque;
   display: block;
   font-family: monospace, monospace;
   text-align: right;
   font-size: 1rem;
   min-width: 30px;
-  border-radius: 3px;
 }
 
 .jsonBox {
@@ -144,5 +146,6 @@ pre {
   display: inline-block;
   padding: 0;
   margin: 0;
+  width: 90%;
 }
 </style>
