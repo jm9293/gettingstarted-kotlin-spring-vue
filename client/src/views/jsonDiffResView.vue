@@ -13,7 +13,7 @@
         </v-col>
         <v-col cols="6">
           <v-banner elevation="1" single-line>Json2</v-banner>
-<!--          <json-box :json-data="result2"></json-box>-->
+        <json-box :json-data="result2"></json-box>
         </v-col>
       </v-row>
       <v-row>

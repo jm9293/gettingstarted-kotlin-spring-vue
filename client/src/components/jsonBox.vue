@@ -3,7 +3,7 @@
     <div class="numberBox">
       <div class="numberLine" v-for="item in row">{{ item }}</div>
     </div>
-    <pre><json-line class="jsonLine" v-for="item in jsonList" :item="item"></json-line></pre>
+    <pre><json-line class="jsonLine" v-for="item in jsonList" :item="item" :diffData = "diffData"></json-line></pre>
   </div>
 </template>
 
@@ -21,7 +21,8 @@ export default {
       jsonList: [],
       row: 0,
       diffResult: {},
-      dep: []
+      dep: [],
+      diffData : {}
     }
   },
 
@@ -37,6 +38,7 @@ export default {
     diffDataParse(key, value) {
 
       if (value instanceof Object && value.hasOwnProperty('value')) {
+        this.diffData[value["spot"]] = {backgroundColor : value["backgroundColor"]}
         return value["value"]
       }
       return value
@@ -114,7 +116,6 @@ export default {
   max-height: 18px;
   width: 640px;
   box-sizing: border-box;
-  background-color: aqua;
   border-radius: 10px;
   padding: 0 10px;
   margin-left: 10px;
