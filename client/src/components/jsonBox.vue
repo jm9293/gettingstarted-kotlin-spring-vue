@@ -21,17 +21,11 @@ export default {
       jsonList: [],
       row: 0,
       diffResult: {},
-      dep: [],
-      caseStyles :[
-        {backgroundColor: "rgba(50, 57, 88, 0.1)"},
-        {backgroundColor: "#cef"},
-        {backgroundColor: "rgba(220, 100, 100, 0.1)"},
-        {backgroundColor: "rgba(0, 160, 80, 0.1)"}
-      ]
+      dep: []
     }
   },
 
-  props: ["jsonData", "diff"],
+  props: ["jsonData", "diff" , "caseStyles"],
 
 
   methods: {

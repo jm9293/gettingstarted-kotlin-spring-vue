@@ -18,7 +18,7 @@
               name="json1"
               label="JSON-1"
               v-model="json1"
-              @focusout="inputOfJSON(1)"
+              @focusout="veautifyJSON(1)"
               rows="20"
           ></v-textarea>
         </v-col>
@@ -31,7 +31,7 @@
               name="json2"
               label="JSON-2"
               v-model="json2"
-              @focusout="inputOfJSON(2)"
+              @focusout="veautifyJSON(2)"
               rows="20"
           ></v-textarea>
         </v-col>
@@ -105,7 +105,7 @@ export default {
       this.json2 = ""
     },
 
-    inputOfJSON(num){ // 복붙했을때 json 형식이 맞으면 변환
+    veautifyJSON(num){ // 복붙했을때 json 형식이 맞으면 변환
       try {
         if(num===1){
           let json = JSON.parse(this.json1);
@@ -121,91 +121,93 @@ export default {
 
 
     sample(){
-      this.json1= "" +
-          "{\n" +
-          "  \"Aidan Gillen\": {\n" +
-          "    \"array\": [\n" +
-          "      \"Game of Thron\\\"es\",\n" +
-      "      \"The Wire\"\n" +
-      "    ],\n" +
-      "    \"string\": \"some string\",\n" +
-      "    \"int\": 2,\n" +
-      "    \"aboolean\": true,\n" +
-      "    \"boolean\": true,\n" +
-      "    \"object\": {\n" +
-      "      \"foo\": \"bar\",\n" +
-      "      \"object1\": {\n" +
-      "        \"new prop1\": \"new prop value\"\n" +
-      "      },\n" +
-      "      \"object2\": {\n" +
-      "        \"new prop1\": \"new prop value\"\n" +
-      "      },\n" +
-      "      \"object3\": {\n" +
-      "        \"new prop1\": \"new prop value\"\n" +
-      "      },\n" +
-      "      \"object4\": {\n" +
-      "        \"new prop1\": \"new prop value\"\n" +
-      "      }\n" +
-      "    }\n" +
-      "  },\n" +
-      "  \"Amy Ryan\": {\n" +
-      "    \"one\": \"In Treatment\",\n" +
-      "    \"two\": \"The Wire\"\n" +
-      "  },\n" +
-      "  \"Annie Fitzgerald\": [\n" +
-      "    \"Big Love\",\n" +
-      "    \"True Blood\"\n" +
-      "  ],\n" +
-      "  \"Anwan Glover\": [\n" +
-      "    \"Treme\",\n" +
-      "    \"The Wire\"\n" +
-      "  ],\n" +
-      "  \"Alexander Skarsgard\": [\n" +
-      "    \"Generation Kill\",\n" +
-      "    \"True Blood\"\n" +
-      "  ],\n" +
-      "  \"Clarke Peters\": null\n" +
-      "}" ;
+      let sample1 = {
+        "Aidan Gillen": {
+          "array": [
+            "Game of Thron\"es",
+            "The Wire"
+          ],
+              "string": "some string",
+              "int": 2,
+              "aboolean": true,
+              "boolean": true,
+              "object": {
+            "foo": "bar",
+                "object1": {
+              "new prop1": "new prop value"
+            },
+            "object2": {
+              "new prop1": "new prop value"
+            },
+            "object3": {
+              "new prop1": "new prop value"
+            },
+            "object4": {
+              "new prop1": "new prop value"
+            }
+          }
+        },
+        "Amy Ryan": {
+          "one": "In Treatment",
+              "two": "The Wire"
+        },
+        "Annie Fitzgerald": [
+          "Big Love",
+          "True Blood"
+        ],
+            "Anwan Glover": [
+          "Treme",
+          "The Wire"
+        ],
+            "Alexander Skarsgard": [
+          "Generation Kill",
+          "True Blood"
+        ],
+            "Clarke Peters": null
+      }
 
-      this.json2 = "{\n" +
-          "  \"Aidan Gillen\": {\n" +
-          "    \"array\": [\n" +
-          "      \"Game of Thrones\",\n" +
-          "      \"The Wire\"\n" +
-          "    ],\n" +
-          "    \"string\": \"some string\",\n" +
-          "    \"int\": \"2\",\n" +
-          "    \"otherint\": 4,\n" +
-          "    \"aboolean\": \"true\",\n" +
-          "    \"boolean\": false,\n" +
-          "    \"object\": {\n" +
-          "      \"foo\": \"bar\"\n" +
-          "    }\n" +
-          "  },\n" +
-          "  \"Amy Ryan\": [\n" +
-          "    \"In Treatment\",\n" +
-          "    \"The Wire\"\n" +
-          "  ],\n" +
-          "  \"Annie Fitzgerald\": [\n" +
-          "    \"True Blood\",\n" +
-          "    \"Big Love\",\n" +
-          "    \"The Sopranos\",\n" +
-          "    \"Oz\"\n" +
-          "  ],\n" +
-          "  \"Anwan Glover\": [\n" +
-          "    \"Treme\",\n" +
-          "    \"The Wire\"\n" +
-          "  ],\n" +
-          "  \"Alexander Skarsg?rd\": [\n" +
-          "    \"Generation Kill\",\n" +
-          "    \"True Blood\"\n" +
-          "  ],\n" +
-          "  \"Alice Farmer\": [\n" +
-          "    \"The Corner\",\n" +
-          "    \"Oz\",\n" +
-          "    \"The Wire\"\n" +
-          "  ]\n" +
-          "}"
+      let sample2 = {
+        "Aidan Gillen": {
+          "array": [
+            "Game of Thrones",
+            "The Wire"
+          ],
+          "string": "some string",
+          "int": "2",
+          "otherint": 4,
+          "aboolean": "true",
+          "boolean": false,
+          "object": {
+            "foo": "bar"
+          }
+        },
+        "Amy Ryan": [
+          "In Treatment",
+          "The Wire"
+        ],
+        "Annie Fitzgerald": [
+          "True Blood",
+          "Big Love",
+          "The Sopranos",
+          "Oz"
+        ],
+        "Anwan Glover": [
+          "Treme",
+          "The Wire"
+        ],
+        "Alexander Skarsg?rd": [
+          "Generation Kill",
+          "True Blood"
+        ],
+        "Alice Farmer": [
+          "The Corner",
+          "Oz",
+          "The Wire"
+        ]
+      }
+
+      this.json1 = JSON.stringify(sample1 , null , 2)
+      this.json2 = JSON.stringify(sample2 , null , 2)
     }
 
 
